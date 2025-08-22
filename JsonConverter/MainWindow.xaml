@@ -6,57 +6,61 @@
         xmlns:local="clr-namespace:JsonConverter"
         mc:Ignorable="d"
         Title="Visualiseur de Fichiers (JSON/XML/YAML/CSV)" Height="600" Width="800">
-    <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
-            <RowDefinition Height="Auto"/>
-        </Grid.RowDefinitions>
+  <Grid>
+    <Grid.RowDefinitions>
+      <RowDefinition Height="Auto"/>
+      <RowDefinition Height="*"/>
+      <RowDefinition Height="Auto"/>
+    </Grid.RowDefinitions>
 
-        <!-- Barre d'outils -->
-        <ToolBar Grid.Row="0">
-            <Button x:Name="btnOpenFile" Click="BtnOpenFile_Click" ToolTip="Ouvrir un fichier">
-                <StackPanel Orientation="Horizontal">
-                    <Image Source="/Resources/folder-open.png" Width="16" Height="16" Margin="0,0,5,0"/>
-                    <TextBlock Text="Ouvrir"/>
-                </StackPanel>
-            </Button>
-            <ComboBox x:Name="cmbFileType" MinWidth="120" Margin="5,0,0,0" SelectedIndex="0">
-                <ComboBoxItem>JSON</ComboBoxItem>
-                <ComboBoxItem>XML</ComboBoxItem>
-                <ComboBoxItem>YAML</ComboBoxItem>
-                <ComboBoxItem>CSV</ComboBoxItem>
-            </ComboBox>
-            
-            <Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" Margin="5,0,5,0"/>
-            
-            <TextBlock Text="Taille police:" VerticalAlignment="Center" Margin="5,0,0,0"/>
-            <ComboBox x:Name="cmbFontSize" 
+    <!-- Barre d'outils -->
+    <ToolBar Grid.Row="0" Background="CornflowerBlue">
+      <Button x:Name="btnOpenFile" Click="BtnOpenFile_Click" ToolTip="Ouvrir un fichier">
+        <StackPanel Orientation="Horizontal">
+          <Image Source="/Resources/folder-open.png" Width="16" Height="16" Margin="0,0,5,0"/>
+          <Border BorderBrush="Black" BorderThickness="2" CornerRadius="5" Padding="5">
+            <TextBlock Text="Ouvrir un fichier" FontWeight="Bold"/>
+          </Border>
+          <Label Content="Type de fichier :" FontWeight="Bold" Foreground="Black" VerticalAlignment="Center" Margin="10,0,0,0" FontStyle="Normal"/>
+
+        </StackPanel>
+      </Button>
+      <ComboBox x:Name="cmbFileType" MinWidth="120" Margin="5,0,0,0" SelectedIndex="0">
+        <ComboBoxItem>JSON</ComboBoxItem>
+        <ComboBoxItem>XML</ComboBoxItem>
+        <ComboBoxItem>YAML</ComboBoxItem>
+        <ComboBoxItem>CSV</ComboBoxItem>
+      </ComboBox>
+
+      <Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" Margin="5,0,5,0"/>
+
+      <TextBlock Text="Taille police :" VerticalAlignment="Center" Margin="5,0,0,0" FontWeight="Bold"/>
+      <ComboBox x:Name="cmbFontSize" 
                      MinWidth="60" 
                      Margin="5,0,0,0" 
                      SelectedIndex="2"
                      SelectionChanged="CmbFontSize_SelectionChanged">
-                <ComboBoxItem>10</ComboBoxItem>
-                <ComboBoxItem>11</ComboBoxItem>
-                <ComboBoxItem>12</ComboBoxItem>
-                <ComboBoxItem>13</ComboBoxItem>
-                <ComboBoxItem>14</ComboBoxItem>
-                <ComboBoxItem>15</ComboBoxItem>
-                <ComboBoxItem>16</ComboBoxItem>
-            </ComboBox>
-        </ToolBar>
+        <ComboBoxItem>10</ComboBoxItem>
+        <ComboBoxItem>11</ComboBoxItem>
+        <ComboBoxItem>12</ComboBoxItem>
+        <ComboBoxItem>13</ComboBoxItem>
+        <ComboBoxItem>14</ComboBoxItem>
+        <ComboBoxItem>15</ComboBoxItem>
+        <ComboBoxItem>16</ComboBoxItem>
+      </ComboBox>
+    </ToolBar>
 
-        <!-- Zone d'affichage -->
-        <Grid Grid.Row="1" Margin="5">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="5"/>
-                <ColumnDefinition Width="*"/>
-            </Grid.ColumnDefinitions>
+    <!-- Zone d'affichage -->
+    <Grid Grid.Row="1" Margin="5">
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="*"/>
+        <ColumnDefinition Width="5"/>
+        <ColumnDefinition Width="*"/>
+      </Grid.ColumnDefinitions>
 
-            <!-- Vue brute du fichier -->
-            <GroupBox Header="Contenu brut" Grid.Column="0">
-                <TextBox x:Name="txtRawContent" 
+      <!-- Vue brute du fichier -->
+      <GroupBox Header="Contenu brut" Grid.Column="0">
+        <TextBox x:Name="txtRawContent" 
                          TextWrapping="Wrap" 
                          AcceptsReturn="True" 
                          VerticalScrollBarVisibility="Auto"
@@ -66,40 +70,40 @@
                          BorderThickness="0"
                          Padding="5"
                          IsReadOnly="True"/>
-            </GroupBox>
+      </GroupBox>
 
-            <GridSplitter Grid.Column="1" Width="5" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Background="#E6D5C3"/>
+      <GridSplitter Grid.Column="1" Width="5" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Background="#E6D5C3"/>
 
-            <!-- Vue formatée -->
-            <GroupBox Header="Vue formatée" Grid.Column="2">
-                <TreeView x:Name="treeViewFormatted" 
+      <!-- Vue formatée -->
+      <GroupBox Header="Vue formatée" Grid.Column="2">
+        <TreeView x:Name="treeViewFormatted" 
                           FontFamily="Consolas"
                           Background="#FFF1E6"  
                           BorderThickness="0"
                           MouseDoubleClick="TreeViewFormatted_MouseDoubleClick">
-                    <TreeView.Resources>
-                        <Style TargetType="{x:Type TreeViewItem}">
-                            <Setter Property="IsExpanded" Value="True"/>
-                            <Setter Property="Background" Value="Transparent"/>
-                            <Style.Resources>
-                                <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="#E6D5C3"/>
-                                <SolidColorBrush x:Key="{x:Static SystemColors.HighlightTextBrushKey}" Color="Black"/>
-                                <SolidColorBrush x:Key="{x:Static SystemColors.ControlBrushKey}" Color="#FFF1E6"/>
-                            </Style.Resources>
-                        </Style>
-                    </TreeView.Resources>
-                </TreeView>
-            </GroupBox>
-        </Grid>
-
-        <!-- Barre d'état -->
-        <StatusBar Grid.Row="2">
-            <StatusBarItem>
-                <TextBlock x:Name="txtStatus" Text="Prêt"/>
-            </StatusBarItem>
-            <StatusBarItem HorizontalAlignment="Right">
-                <TextBlock x:Name="txtFileInfo" Text="Aucun fichier chargé"/>
-            </StatusBarItem>
-        </StatusBar>
+          <TreeView.Resources>
+            <Style TargetType="{x:Type TreeViewItem}">
+              <Setter Property="IsExpanded" Value="True"/>
+              <Setter Property="Background" Value="Transparent"/>
+              <Style.Resources>
+                <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="#E6D5C3"/>
+                <SolidColorBrush x:Key="{x:Static SystemColors.HighlightTextBrushKey}" Color="Black"/>
+                <SolidColorBrush x:Key="{x:Static SystemColors.ControlBrushKey}" Color="#FFF1E6"/>
+              </Style.Resources>
+            </Style>
+          </TreeView.Resources>
+        </TreeView>
+      </GroupBox>
     </Grid>
+
+    <!-- Barre d'état -->
+    <StatusBar Grid.Row="2">
+      <StatusBarItem>
+        <TextBlock x:Name="txtStatus" Text="Prêt"/>
+      </StatusBarItem>
+      <StatusBarItem HorizontalAlignment="Right">
+        <TextBlock x:Name="txtFileInfo" Text="Aucun fichier chargé"/>
+      </StatusBarItem>
+    </StatusBar>
+  </Grid>
 </Window>
