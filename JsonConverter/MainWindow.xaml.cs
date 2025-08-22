@@ -11,6 +11,8 @@ using System.Xml;
 using YamlDotNet.Serialization;
 using System.Data;
 using System.Linq;
+using System.Threading.Tasks;
+using System.Windows.Threading;
 
 namespace JsonConverter
 {
@@ -24,7 +26,7 @@ namespace JsonConverter
             cmbFileType.SelectionChanged += CmbFileType_SelectionChanged;
         }
 
-        private void BtnOpenFile_Click(object sender, RoutedEventArgs e)
+        private async void BtnOpenFile_Click(object sender, RoutedEventArgs e)
         {
             var openFileDialog = new OpenFileDialog
             {
@@ -34,51 +36,101 @@ namespace JsonConverter
 
             if (openFileDialog.ShowDialog() == true)
             {
+                var loadingWindow = new LoadingWindow();
                 try
                 {
-                    currentFilePath = openFileDialog.FileName;
-                    txtFileInfo.Text = Path.GetFileName(currentFilePath);
-                    LoadFile(currentFilePath);
+                    // Afficher la fenêtre de chargement
+                    loadingWindow.Show();
+                    Application.Current.Dispatcher.Invoke(() => { }, System.Windows.Threading.DispatcherPriority.Background);
+
+                    await System.Threading.Tasks.Task.Run(() =>
+                    {
+                        Dispatcher.Invoke(() =>
+                        {
+                            currentFilePath = openFileDialog.FileName;
+                            txtFileInfo.Text = Path.GetFileName(currentFilePath);
+                            LoadFile(currentFilePath);
+                        });
+                    });
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show($"Erreur lors du chargement du fichier : {ex.Message}", "Erreur", 
-                        MessageBoxButton.OK, MessageBoxImage.Error);
+                    MessageBox.Show($"Erreur lors du chargement du fichier : {ex.Message}", 
+                        "Erreur", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+                finally
+                {
+                    loadingWindow.Close();
                 }
             }
         }
 
-        private void LoadFile(string filePath)
+        private async void LoadFile(string filePath)
         {
+            var loadingWindow = new LoadingWindow();
             try
             {
-                string fileContent = File.ReadAllText(filePath);
-                txtRawContent.Text = fileContent;
+                // Afficher la fenêtre de chargement
+                loadingWindow.Show();
+                Application.Current.Dispatcher.Invoke(() => { }, System.Windows.Threading.DispatcherPriority.Background);
 
-                string selectedType = ((ComboBoxItem)cmbFileType.SelectedItem).Content.ToString();
-                
-                switch (selectedType)
+                await System.Threading.Tasks.Task.Run(() =>
                 {
-                    case "JSON":
-                        DisplayJson(fileContent);
-                        break;
-                    case "XML":
-                        DisplayXml(fileContent);
-                        break;
-                    case "YAML":
-                        DisplayYaml(fileContent);
-                        break;
-                    case "CSV":
-                        DisplayCsv(fileContent);
-                        break;
-                }
-
-                txtStatus.Text = "Fichier chargé avec succès";
+                    string fileContent = File.ReadAllText(filePath);
+                    Dispatcher.Invoke(() =>
+                    {
+                        txtRawContent.Text = fileContent;
+                        string selectedType = ((ComboBoxItem)cmbFileType.SelectedItem).Content.ToString();
+                        
+                        switch (selectedType)
+                        {
+                            case "JSON":
+                                DisplayJson(fileContent);
+                                break;
+                            case "XML":
+                                DisplayXml(fileContent);
+                                break;
+                            case "YAML":
+                                DisplayYaml(fileContent);
+                                break;
+                            case "CSV":
+                                DisplayCsv(fileContent);
+                                break;
+                        }
+                        txtStatus.Text = "Fichier chargé avec succès";
+                    });
+                });
             }
             catch (Exception ex)
             {
-                txtStatus.Text = $"Erreur : {ex.Message}";
-                treeViewFormatted.Items.Clear();
+                Dispatcher.Invoke(() =>
+                {
+                    txtStatus.Text = $"Erreur : {ex.Message}";
+                    treeViewFormatted.Items.Clear();
+                });
+            }
+            finally
+            {
+                Dispatcher.Invoke(() =>
+                {
+                    loadingWindow.Close();
+                });
+            }
+        }
+
+        private void CmbFileType_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (!string.IsNullOrEmpty(currentFilePath))
+            {
+                try
+                {
+                    LoadFile(currentFilePath);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Erreur lors du changement de type de fichier : {ex.Message}", 
+                        "Erreur", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
             }
         }
 
@@ -126,22 +178,6 @@ namespace JsonConverter
             catch (Exception)
             {
                 throw new InvalidOperationException("Le contenu n'est pas un YAML valide.");
-            }
-        }
-
-        private void CmbFileType_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            if (!string.IsNullOrEmpty(currentFilePath))
-            {
-                try
-                {
-                    LoadFile(currentFilePath);
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show($"Erreur lors du changement de type de fichier : {ex.Message}", 
-                        "Erreur", MessageBoxButton.OK, MessageBoxImage.Error);
-                }
             }
         }
 
