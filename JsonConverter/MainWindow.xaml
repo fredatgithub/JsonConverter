@@ -5,8 +5,73 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:JsonConverter"
         mc:Ignorable="d"
-        Title="Json converter" Height="450" Width="800">
+        Title="Visualiseur de Fichiers (JSON/XML/YAML/CSV)" Height="600" Width="1000">
     <Grid>
-        
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Barre d'outils -->
+        <ToolBar Grid.Row="0">
+            <Button x:Name="btnOpenFile" Click="BtnOpenFile_Click" ToolTip="Ouvrir un fichier">
+                <StackPanel Orientation="Horizontal">
+                    <Image Source="/Resources/folder-open.png" Width="16" Height="16" Margin="0,0,5,0"/>
+                    <TextBlock Text="Ouvrir"/>
+                </StackPanel>
+            </Button>
+            <ComboBox x:Name="cmbFileType" MinWidth="120" Margin="5,0,0,0" SelectedIndex="0">
+                <ComboBoxItem>JSON</ComboBoxItem>
+                <ComboBoxItem>XML</ComboBoxItem>
+                <ComboBoxItem>YAML</ComboBoxItem>
+                <ComboBoxItem>CSV</ComboBoxItem>
+            </ComboBox>
+        </ToolBar>
+
+        <!-- Zone d'affichage -->
+        <Grid Grid.Row="1" Margin="5">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="5"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- Vue brute du fichier -->
+            <GroupBox Header="Contenu brut" Grid.Column="0">
+                <TextBox x:Name="txtRawContent" 
+                         TextWrapping="Wrap" 
+                         AcceptsReturn="True" 
+                         VerticalScrollBarVisibility="Auto"
+                         HorizontalScrollBarVisibility="Auto"
+                         FontFamily="Consolas"
+                         IsReadOnly="True"/>
+            </GroupBox>
+
+            <GridSplitter Grid.Column="1" Width="5" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"/>
+
+            <!-- Vue formatée -->
+            <GroupBox Header="Vue formatée" Grid.Column="2">
+                <TreeView x:Name="treeViewFormatted" 
+                          FontFamily="Consolas"
+                          MouseDoubleClick="TreeViewFormatted_MouseDoubleClick">
+                    <TreeView.Resources>
+                        <Style TargetType="{x:Type TreeViewItem}">
+                            <Setter Property="IsExpanded" Value="True"/>
+                        </Style>
+                    </TreeView.Resources>
+                </TreeView>
+            </GroupBox>
+        </Grid>
+
+        <!-- Barre d'état -->
+        <StatusBar Grid.Row="2">
+            <StatusBarItem>
+                <TextBlock x:Name="txtStatus" Text="Prêt"/>
+            </StatusBarItem>
+            <StatusBarItem HorizontalAlignment="Right">
+                <TextBlock x:Name="txtFileInfo" Text="Aucun fichier chargé"/>
+            </StatusBarItem>
+        </StatusBar>
     </Grid>
 </Window>
