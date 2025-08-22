@@ -13,6 +13,7 @@ using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Threading;
+using System.Diagnostics;
 
 namespace JsonConverter
 {
@@ -22,8 +23,134 @@ namespace JsonConverter
 
         public MainWindow()
         {
-            InitializeComponent();
-            cmbFileType.SelectionChanged += CmbFileType_SelectionChanged;
+            try
+            {
+                InitializeComponent();
+                
+                // Initialiser les gestionnaires d'événements
+                cmbFileType.SelectionChanged += CmbFileType_SelectionChanged;
+                
+                // Charger les préférences
+                LoadLastFileType();
+                
+                // Configurer la taille de police après le chargement complet
+                this.Loaded += (s, e) => 
+                {
+                    // Initialiser le gestionnaire d'événements après le chargement
+                    cmbFontSize.SelectionChanged += CmbFontSize_SelectionChanged;
+                    
+                    // Charger la taille de police
+                    double fontSize = Properties.Settings.Default.FontSize;
+                    if (fontSize < 10 || fontSize > 16) // Valeur par défaut si hors limites
+                        fontSize = 12;
+                    
+                    // Sélectionner la bonne taille dans la liste
+                    foreach (ComboBoxItem item in cmbFontSize.Items)
+                    {
+                        if (double.TryParse(item.Content.ToString(), out double itemSize) && 
+                            Math.Abs(itemSize - fontSize) < 0.1)
+                        {
+                            cmbFontSize.SelectedItem = item;
+                            break;
+                        }
+                    }
+                    
+                    // Appliquer la taille de police
+                    ApplyFontSize(fontSize);
+                };
+                
+                // Sauvegarder les préférences à la fermeture
+                this.Closing += (s, e) => 
+                {
+                    SaveLastFileType();
+                    SaveFontSize();
+                };
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Erreur lors de l'initialisation : {ex.Message}", 
+                    "Erreur", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        private void ApplyFontSize(double size)
+        {
+            if (txtRawContent != null) txtRawContent.FontSize = size;
+            if (treeViewFormatted != null) treeViewFormatted.FontSize = size;
+        }
+
+        private void SaveFontSize()
+        {
+            try
+            {
+                if (cmbFontSize?.SelectedItem is ComboBoxItem selectedItem && 
+                    double.TryParse(selectedItem.Content.ToString(), out double size))
+                {
+                    Properties.Settings.Default.FontSize = size;
+                    Properties.Settings.Default.Save();
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Erreur lors de la sauvegarde de la taille de police : {ex.Message}");
+            }
+        }
+
+        private void CmbFontSize_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (cmbFontSize?.SelectedItem is ComboBoxItem selectedItem && 
+                double.TryParse(selectedItem.Content.ToString(), out double size))
+            {
+                ApplyFontSize(size);
+                SaveFontSize();
+            }
+        }
+
+        private void MainWindow_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            SaveLastFileType();
+            SaveFontSize();
+        }
+
+        private void LoadLastFileType()
+        {
+            try
+            {
+                string lastFileType = Properties.Settings.Default.LastFileType;
+                if (!string.IsNullOrEmpty(lastFileType))
+                {
+                    // Trouver et sélectionner le type de fichier sauvegardé
+                    foreach (ComboBoxItem item in cmbFileType.Items)
+                    {
+                        if (item.Content.ToString() == lastFileType)
+                        {
+                            cmbFileType.SelectedItem = item;
+                            break;
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                // En cas d'erreur, on garde la sélection par défaut
+                Debug.WriteLine($"Erreur lors du chargement du dernier type de fichier : {ex.Message}");
+            }
+        }
+
+        private void SaveLastFileType()
+        {
+            try
+            {
+                if (cmbFileType.SelectedItem is ComboBoxItem selectedItem)
+                {
+                    Properties.Settings.Default.LastFileType = selectedItem.Content.ToString();
+                    Properties.Settings.Default.Save();
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Erreur lors de la sauvegarde du type de fichier : {ex.Message}");
+            }
         }
 
         private async void BtnOpenFile_Click(object sender, RoutedEventArgs e)
@@ -120,16 +247,33 @@ namespace JsonConverter
 
         private void CmbFileType_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
+            // Sauvegarder le type sélectionné
+            SaveLastFileType();
+            
             if (!string.IsNullOrEmpty(currentFilePath))
             {
+                var loadingWindow = new LoadingWindow();
                 try
                 {
-                    LoadFile(currentFilePath);
+                    loadingWindow.Show();
+                    Application.Current.Dispatcher.Invoke(() => { }, System.Windows.Threading.DispatcherPriority.Background);
+
+                    Dispatcher.Invoke(() =>
+                    {
+                        LoadFile(currentFilePath);
+                    });
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show($"Erreur lors du changement de type de fichier : {ex.Message}", 
-                        "Erreur", MessageBoxButton.OK, MessageBoxImage.Error);
+                    Dispatcher.Invoke(() =>
+                    {
+                        MessageBox.Show($"Erreur lors du changement de type de fichier : {ex.Message}", 
+                            "Erreur", MessageBoxButton.OK, MessageBoxImage.Error);
+                    });
+                }
+                finally
+                {
+                    loadingWindow.Close();
                 }
             }
         }

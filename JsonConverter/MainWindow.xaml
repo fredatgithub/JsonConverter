@@ -27,6 +27,23 @@
                 <ComboBoxItem>YAML</ComboBoxItem>
                 <ComboBoxItem>CSV</ComboBoxItem>
             </ComboBox>
+            
+            <Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" Margin="5,0,5,0"/>
+            
+            <TextBlock Text="Taille police:" VerticalAlignment="Center" Margin="5,0,0,0"/>
+            <ComboBox x:Name="cmbFontSize" 
+                     MinWidth="60" 
+                     Margin="5,0,0,0" 
+                     SelectedIndex="2"
+                     SelectionChanged="CmbFontSize_SelectionChanged">
+                <ComboBoxItem>10</ComboBoxItem>
+                <ComboBoxItem>11</ComboBoxItem>
+                <ComboBoxItem>12</ComboBoxItem>
+                <ComboBoxItem>13</ComboBoxItem>
+                <ComboBoxItem>14</ComboBoxItem>
+                <ComboBoxItem>15</ComboBoxItem>
+                <ComboBoxItem>16</ComboBoxItem>
+            </ComboBox>
         </ToolBar>
 
         <!-- Zone d'affichage -->
