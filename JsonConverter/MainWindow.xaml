@@ -45,19 +45,30 @@
                          VerticalScrollBarVisibility="Auto"
                          HorizontalScrollBarVisibility="Auto"
                          FontFamily="Consolas"
+                         Background="#FFF8F9FA"
+                         BorderThickness="0"
+                         Padding="5"
                          IsReadOnly="True"/>
             </GroupBox>
 
-            <GridSplitter Grid.Column="1" Width="5" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"/>
+            <GridSplitter Grid.Column="1" Width="5" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Background="#E9ECEF"/>
 
             <!-- Vue formatée -->
             <GroupBox Header="Vue formatée" Grid.Column="2">
                 <TreeView x:Name="treeViewFormatted" 
                           FontFamily="Consolas"
+                          Background="#F8F9FA"
+                          BorderThickness="0"
                           MouseDoubleClick="TreeViewFormatted_MouseDoubleClick">
                     <TreeView.Resources>
                         <Style TargetType="{x:Type TreeViewItem}">
                             <Setter Property="IsExpanded" Value="True"/>
+                            <Setter Property="Background" Value="Transparent"/>
+                            <Style.Resources>
+                                <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="#E9ECEF"/>
+                                <SolidColorBrush x:Key="{x:Static SystemColors.HighlightTextBrushKey}" Color="Black"/>
+                                <SolidColorBrush x:Key="{x:Static SystemColors.ControlBrushKey}" Color="#F8F9FA"/>
+                            </Style.Resources>
                         </Style>
                     </TreeView.Resources>
                 </TreeView>
